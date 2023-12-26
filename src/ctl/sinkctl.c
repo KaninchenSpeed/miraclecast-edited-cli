@@ -78,6 +78,7 @@ bool external_player;
 int rstp_port;
 int uibc_port;
 char* player;
+char* friendly_name;
 GHashTable* protocol_extensions;
 
 unsigned int wfd_supported_res_cea  = 0x0001ffff;
@@ -262,6 +263,10 @@ static void run_on(struct ctl_link *l)
 	ctl_link_set_wfd_subelements(l, "000600111c4400c8");
 	ctl_link_set_p2p_scanning(l, true);
 	cli_printf("now running on link %s\n", running_link->label);
+	if (friendly_name) {
+		ctl_link_set_friendly_name(l, friendly_name);
+		cli_printf("set friendly name to %s\n", friendly_name);
+	}
 }
 
 static int cmd_run(char **args, unsigned int n)
@@ -888,7 +893,8 @@ static int parse_argv(int argc, char *argv[])
 		ARG_RES,
 		ARG_HELP_RES,
 		ARG_UIBC,
-      ARG_HELP_COMMANDS,
+      		ARG_HELP_COMMANDS,
+		ARG_FRIENDLY_NAME
 	};
 	static const struct option options[] = {
 		{ "help",		no_argument,		NULL,	'h' },
@@ -906,6 +912,7 @@ static int parse_argv(int argc, char *argv[])
 		{ "port",		required_argument,	NULL,	'p' },
 		{ "uibc",		no_argument,		NULL,	ARG_UIBC },
 		{ "external-player",		required_argument,		NULL,	'e' },
+		{ "friendly_name", required_argument, NULL, ARG_FRIENDLY_NAME },
 		{}
 	};
 	int c;
@@ -964,6 +971,9 @@ static int parse_argv(int argc, char *argv[])
 			break;
 		case ARG_UIBC:
 			uibc_option = true;
+			break;
+		case ARG_FRIENDLY_NAME:
+			friendly_name = optarg;
 			break;
 		case '?':
 			return -EINVAL;
