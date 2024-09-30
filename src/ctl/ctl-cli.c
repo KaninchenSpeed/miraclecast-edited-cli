@@ -27,6 +27,7 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/signalfd.h>
+#include <sys/time.h>
 #include <sys/wait.h>
 #include <systemd/sd-bus.h>
 #include "ctl.h"
@@ -34,7 +35,6 @@
 #include "shl_util.h"
 #include "shl_log.h"
 #include <math.h>
-#include <time.h>
 
 
 /*
@@ -94,7 +94,7 @@ void cli_printf_time_prefix(const char *fmt, va_list args)
 	struct tm *timeinfo;
 	struct timeval tv;
 	char buffertmp[80];
-	char buffer[80];
+	char buffer[120];
 	int millisec;
 
 
@@ -331,7 +331,7 @@ char *
 yes_no_generator (const char *text, int state)
 {
   static int list_index, len;
-  char *name;
+  const char *name;
 
   /* If this is a new word to complete, initialize now.  This includes
      saving the length of TEXT for efficiency, and initializing the index
@@ -343,7 +343,7 @@ yes_no_generator (const char *text, int state)
     }
 
   /* Return the next name which partially matches from the command list. */
-  while (name = yes_no_options[list_index])
+  while ((name = yes_no_options[list_index]) != NULL)
     {
       list_index++;
 
@@ -359,7 +359,6 @@ char *
 links_peers_generator (const char *text, int state)
 {
   static int list_index, len;
-  char *name;
   size_t peer_cnt = 0;
   size_t link_cnt = 0;
   struct shl_dlist *i, *j;
@@ -444,7 +443,6 @@ char *
 peers_generator (const char *text, int state)
 {
   static int list_index, len;
-  char *name;
   size_t peer_cnt = 0;
   struct shl_dlist *i, *j;
   struct ctl_link *l;
@@ -497,7 +495,6 @@ char *
 links_generator (const char *text, int state)
 {
   static int list_index, len;
-  char *name;
   size_t link_cnt = 0;
   struct shl_dlist *i;
   struct ctl_link *l;
@@ -553,7 +550,7 @@ char *
 command_generator (const char *text, int state)
 {
   static int list_index, len;
-  char *name;
+  const char *name;
 
   /* If this is a new word to complete, initialize now.  This includes
      saving the length of TEXT for efficiency, and initializing the index
@@ -565,7 +562,7 @@ command_generator (const char *text, int state)
     }
 
   /* Return the next name which partially matches from the command list. */
-  while (name = cli_cmds[list_index].cmd)
+  while ((name = cli_cmds[list_index].cmd) != NULL)
     {
       list_index++;
 
@@ -594,7 +591,7 @@ int get_args(char* line)
         }
         tmp++;
     }
-    if (" " != *last_delim)
+    if (' ' != *last_delim)
         count++;
     return count;
 }
